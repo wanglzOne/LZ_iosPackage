@@ -1,0 +1,102 @@
+//
+//  CLYBViewController.m
+//  iOS封装
+//
+//  Created by mac on 17/1/10.
+//  Copyright © 2017年 cdcyi. All rights reserved.
+//
+
+#import "CLYBViewController.h"
+
+@interface CLYBViewController ()
+@property (weak, nonatomic) IBOutlet UILabel *oneL;
+@property (weak, nonatomic) IBOutlet UILabel *twoL;
+@property (weak, nonatomic) IBOutlet UILabel *thereeL;
+
+@property (nonatomic,strong)NSTimer *oneTimer;
+@property (nonatomic,strong)NSTimer *twoTimer;
+@property (nonatomic,strong)NSTimer *thereeTimer;
+
+
+@property (nonatomic,assign)bool enabled;
+
+@property (nonatomic,strong)NSString *oneStr;
+@property (nonatomic,strong)NSString *twoStr;
+@property (nonatomic,strong)NSString *thereeStr;
+
+
+@end
+
+@implementation CLYBViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    _enabled = YES;
+    _oneStr = @"0";
+    _twoStr = @"0";
+    _thereeStr = @"0";
+}
+
+-(void)startOneTimer{
+    if (!_oneTimer) {
+        _oneTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(clickOneTimer) userInfo:nil repeats:YES];
+    }
+}
+-(void)startTwoTimer{
+    if (!_twoTimer) {
+        _twoTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(clickTwoTimer) userInfo:nil repeats:YES];
+    }
+}
+-(void)startThereeTimer{
+    if (!_thereeTimer) {
+        _thereeTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(clickThereeTimer) userInfo:nil repeats:YES];
+    }
+}
+
+-(void)stopTimer:(NSTimer*)timer{
+    [timer invalidate];
+    timer = nil;
+}
+
+-(void)clickOneTimer{
+    _oneL.text = [NSString stringWithFormat:@"%zd",[_oneStr integerValue] + 1];
+    if ([_oneStr integerValue] + 1 > 10) {
+        [self stopTimer:_oneTimer];
+    }
+}
+
+-(void)clickTwoTimer{
+    _twoL.text = [NSString stringWithFormat:@"%zd",[_twoStr integerValue] + 1];
+    if ([_oneStr integerValue] + 1 > 10) {
+        [self stopTimer:_twoTimer];
+    }
+}
+
+-(void)clickThereeTimer{
+    _enabled = YES;
+    _thereeL.text = [NSString stringWithFormat:@"%zd",[_thereeStr integerValue] + 1];
+    if ([_oneStr integerValue] + 1 > 10) {
+        [self stopTimer:_thereeTimer];
+    }
+}
+
+- (IBAction)weiChuli:(UIButton *)sender {
+    if (!_enabled) {
+        return;
+    }
+    _enabled = NO;
+    [self stopTimer:_oneTimer];
+    [self stopTimer:_twoTimer];
+    [self stopTimer:_thereeTimer];
+    
+}
+- (IBAction)chuLI:(UIButton *)sender {
+    if (!_enabled) {
+        return;
+    }
+    _enabled = NO;
+}
+
+
+@end

@@ -1,0 +1,180 @@
+//
+//  CLYBViewController.m
+//  iOS封装
+//
+//  Created by mac on 17/1/10.
+//  Copyright © 2017年 cdcyi. All rights reserved.
+//
+
+#import "CLYBViewController.h"
+
+@interface CLYBViewController ()
+@property (weak, nonatomic) IBOutlet UILabel *oneL;
+@property (weak, nonatomic) IBOutlet UILabel *twoL;
+@property (weak, nonatomic) IBOutlet UILabel *thereeL;
+
+@property (nonatomic,strong)NSTimer *oneTimer;
+@property (nonatomic,strong)NSTimer *twoTimer;
+@property (nonatomic,strong)NSTimer *thereeTimer;
+@property (weak, nonatomic) IBOutlet UIImageView *markimg;
+@property (nonatomic,strong)dispatch_semaphore_t sema;
+
+
+@property (nonatomic,assign)bool enabled;
+
+@property (nonatomic,strong)NSString *oneStr;
+@property (nonatomic,strong)NSString *twoStr;
+@property (nonatomic,strong)NSString *thereeStr;
+
+
+@property (nonatomic,assign)NSInteger click; //1:点击了第一个按钮 2:点击了第二个按钮
+
+
+@end
+
+@implementation CLYBViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"处理异步线程并发，比如：有ABC三个网络请求，B需要在A网络请求完之后获取到B需要传递的参数才能进行B网络请求，而C呢又需要等到B网络请求完之后获取到C需要传递的参数才能进行C网络请求";
+    // Do any additional setup after loading the view from its nib.
+    _enabled = YES;
+    _oneStr = @"0";
+    _twoStr = @"0";
+    _thereeStr = @"0";
+    
+    
+    
+}
+
+-(void)startOneTimer{
+    if (!_oneTimer) {
+        _oneTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(clickOneTimer) userInfo:nil repeats:YES];
+    }
+}
+-(void)startTwoTimer{
+    if (!_twoTimer) {
+        _twoTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(clickTwoTimer) userInfo:nil repeats:YES];
+    }
+}
+-(void)startThereeTimer{
+    if (!_thereeTimer) {
+        _thereeTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(clickThereeTimer) userInfo:nil repeats:YES];
+    }
+}
+
+-(void)stopOneTimer{
+    [_oneTimer invalidate];
+    _oneTimer = nil;
+}
+-(void)stopTwoTimer{
+    [_twoTimer invalidate];
+    _twoTimer = nil;
+}
+-(void)stopThereeTimer{
+    [_thereeTimer invalidate];
+    _thereeTimer = nil;
+}
+
+-(void)clickOneTimer{
+    if (_click == 1) {
+        _oneStr = [NSString stringWithFormat:@"%zd",[_oneStr integerValue] + 1];
+        _oneL.text = _oneStr;
+        if ([_oneL.text integerValue] > 9) {
+            [self stopOneTimer];
+            _oneStr = @"0";
+        }
+    }else{
+        _oneStr = [NSString stringWithFormat:@"%zd",[_oneStr integerValue] + 1];
+        _oneL.text = _oneStr;
+        _twoL.text = @"0";
+        _thereeL.text = @"0";
+        if ([_oneL.text integerValue] > 9) {
+            [self stopOneTimer];
+            [self startTwoTimer];
+        }
+    }
+   
+    
+    
+    
+}
+
+-(void)clickTwoTimer{
+    if (_click == 1) {
+        _twoStr = [NSString stringWithFormat:@"%zd",[_twoStr integerValue] + 1];
+        _twoL.text = _twoStr;
+        if ([_twoL.text integerValue] > 9) {
+            [self stopTwoTimer];
+            _twoStr = @"0";
+            
+        }
+    }else{
+        _twoStr = [NSString stringWithFormat:@"%zd",[_twoStr integerValue] + 1];
+        _twoL.text = _twoStr;
+        if ([_twoL.text integerValue] > 9) {
+            [self stopTwoTimer];
+            _twoStr = @"0";
+            [self startThereeTimer];
+        }
+    }
+   
+}
+
+-(void)clickThereeTimer{
+    _enabled = YES;
+    if (_click == 1) {
+        _thereeStr = [NSString stringWithFormat:@"%zd",[_thereeStr integerValue] + 1];
+        _thereeL.text = _thereeStr;
+        if ([_thereeL.text integerValue] > 9) {
+            [self stopThereeTimer];
+            _thereeStr = @"0";
+            _markimg.hidden = NO;
+        }else{
+            _markimg.hidden = YES;
+        }
+    }else{
+        _thereeStr = [NSString stringWithFormat:@"%zd",[_thereeStr integerValue] + 1];
+        _thereeL.text = _thereeStr;
+        if ([_thereeL.text integerValue] > 9) {
+            [self stopThereeTimer];
+            _thereeStr = @"0";
+            _oneStr = @"0";
+            _twoStr = @"0";
+            _markimg.hidden = NO;
+        }else{
+            _markimg.hidden = YES;
+        }
+    }
+}
+
+- (IBAction)weiChuli:(UIButton *)sender {
+    if (!_enabled) {
+        return;
+    }
+    _enabled = NO;
+    _click = 1;
+    [self startOneTimer];
+    [self startTwoTimer];
+    [self startThereeTimer];
+    
+}
+- (IBAction)chuLI:(UIButton *)sender {
+    if (!_enabled) {
+        return;
+    }
+    _enabled = NO;
+    _click = 2;
+    [self startOneTimer];
+    
+}
+
+
+-(void)viewDidDisappear:(BOOL)animated{
+    [self stopOneTimer];
+    [self stopThereeTimer];
+    [self stopTwoTimer];
+}
+
+
+@end
